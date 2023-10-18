@@ -1,0 +1,121 @@
+Copie os arquivos manterativo-telegram e manterativo-whatsapp e salve no caminho abaixo 
+
+# /usr/lib/zabbix/alertscripts
+
+Execute a permissão dos arquivos 
+
+# chmod +x /usr/lib/zabbix/alertscripts/manterativo-telegram
+# chmod +x /usr/lib/zabbix/alertscripts/manterativo-whatsapp
+
+Edite o arquivo manterativo-telegram 
+
+# nano /usr/lib/zabbix/alertscripts/manterativo-telegram
+
+#!/bin/bash
+# Autor: COLOQUE O NOME DA EMPRESA
+TOKEN="COLOQUE A CHAVE DO TOKEN"
+
+USER=COLOQUE O ID DO TELEGRAM
+SUBJECT=$2
+MESSAGE="A API está funcionando ✅"
+PROBLEM=$4
+NL="
+"
+curl --silent -X POST --data-urlencode "chat_id=${USER}" --data-urlencode "text=${SUBJECT}${NL}${NL}${MESSAGE}${NL}${PROBLEM}" "https://api.telegram.org/bot${TOKEN}/sendMessage?disable>
+
+exit 0
+
+Depois save e feche o nano 
+
+# nano /usr/lib/zabbix/alertscripts/manterativo-whatsapp
+
+#!/bin/bash
+
+#Desenvolvido por: Bee Solutions
+#Autor: Fernando Almondes
+#Data: 29/05/2023
+
+URL="http://localhost:4000/api/message"
+PHONE=COLOQUE AQUI O NUMERO COMPLETO OU O ID DO GRUPO
+TITULO=""
+MESSAGE="A API está funcionando ✅"
+
+curl --location --request POST "$URL" \
+--header 'Content-Type: application/json' \
+--data-raw "{
+    \"number\": \"${PHONE}\",
+    \"message\": \"${MESSAGE}\"
+}"
+
+Depois save e feche o nano
+
+No terminal do Linux execute o comando 
+
+# crontab -e 
+
+Sera aberto o editor de tarefas e va ate a ultima linha e insira os dados abaixo
+
+Telegram
+
+comando: crontab -e
+
+O crontab tem o seguinte formato:
+[minutos] [horas] [dias do mês] [mês] [dias da semana] [usuário] [comando]
+O preenchimento de cada campo é feito da seguinte maneira:
+- Minutos: informe números de 0 a 59;
+- Horas: informe números de 0 a 23;
+- Dias do mês: informe números de 0 a 31;
+- Mês: informe números de 1 a 12;
+- Dias da semana: informe números de 0 a 7;
+
+Dias da semana
+0 = domingo
+1 = segunda
+2 = terca
+3 = quarta
+4 = quinta 
+5 = sexta
+6 = sabado
+7 = domingo
+
+# esse envia mensagem a cada 1 minuto #
+*/1 * * * * bash /usr/lib/zabbix/alertscripts/manterativo-telegram 
+
+# esse envia mensagem as 7 horas de segunda a domingo #
+0 7 * * 1,2,3,4,5,6,7 bash /usr/lib/zabbix/alertscripts/manterativo-telegram 
+
+# executa esse comando apos configurar o crontab
+chmod 777 /usr/lib/zabbix/alertscripts/manterativo-telegram
+
+WhatsApp
+
+comando: crontab -e
+
+O crontab tem o seguinte formato:
+[minutos] [horas] [dias do mês] [mês] [dias da semana] [usuário] [comando]
+O preenchimento de cada campo é feito da seguinte maneira:
+- Minutos: informe números de 0 a 59;
+- Horas: informe números de 0 a 23;
+- Dias do mês: informe números de 0 a 31;
+- Mês: informe números de 1 a 12;
+- Dias da semana: informe números de 0 a 7;
+
+Dias da semana
+0 = domingo
+1 = segunda
+2 = terca
+3 = quarta
+4 = quinta 
+5 = sexta
+6 = sabado
+7 = domingo
+
+# esse envia mensagem a cada 1 minuto #
+*/1 * * * * bash /usr/lib/zabbix/alertscripts/manterativo-whatsapp
+
+# esse envia mensagem as 7 horas de segunda a domingo #
+0 7 * * 1,2,3,4,5,6,7 bash /usr/lib/zabbix/alertscripts/manterativo-whatsapp
+
+# executa esse comando apos configurar o crontab
+chmod 777 /usr/lib/zabbix/alertscripts/manterativo-whatsapp
+

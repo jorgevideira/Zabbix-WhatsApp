@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<zabbix_export>
+    <version>5.0</version>
+    <date>2023-10-17T17:57:53Z</date>
+    <media_types>
+        <media_type>
+            <name>Alertas WhatsApp Graficos - BEE</name>
+            <type>SCRIPT</type>
+            <script_name>beebotzap.py</script_name>
+            <parameters>
+                <parameter>{ALERT.MESSAGE}</parameter>
+                <parameter>{ALERT.SUBJECT}</parameter>
+                <parameter>{ALERT.SENDTO}</parameter>
+            </parameters>
+            <message_templates>
+                <message_template>
+                    <event_source>TRIGGERS</event_source>
+                    <operation_mode>PROBLEM</operation_mode>
+                    <subject>*Alerta de Novo Incidente* ❌</subject>
+                    <message>*Iniciado em*: {EVENT.TIME}
+*Problema*: {EVENT.NAME}
+*Item*: {ITEM.NAME}
+*Host*: {HOST.NAME}
+*Host IP*: {HOST.CONN}
+*Severidade*: {EVENT.SEVERITY}
+*Status Anterior*: {?last(//{ITEM.KEY},#2)}
+*Status Atual*: {EVENT.OPDATA}
+Item ID: {ITEM.ID}
+*Ação*: Por favor, verificar dispositivo.❌\n
+*By*: Bee Solutions (Beezap Bot)</message>
+                </message_template>
+                <message_template>
+                    <event_source>TRIGGERS</event_source>
+                    <operation_mode>RECOVERY</operation_mode>
+                    <subject>*Alerta de Resolução de Incidente* ✅</subject>
+                    <message>*Resolvido em*: {EVENT.RECOVERY.TIME} de {EVENT.RECOVERY.DATE}
+*Problema*: {EVENT.NAME}
+*Duração*: {EVENT.DURATION}
+*Item*: {ITEM.NAME}
+*Host*: {HOST.NAME}
+*Host IP*: {HOST.CONN}
+*Severidade*: {EVENT.SEVERITY}
+*Status Anterior*: {?last(//{ITEM.KEY},#2)}
+*Status Atual*: {EVENT.OPDATA}
+Item ID: {ITEM.ID}
+*Ação*: O Incidente foi resolvido ✅.\n
+*By*: Bee Solutions (Beezap Bot)</message>
+                </message_template>
+            </message_templates>
+        </media_type>
+    </media_types>
+</zabbix_export>

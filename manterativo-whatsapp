@@ -1,0 +1,13 @@
+#!/bin/bash
+
+URL="http://localhost:4000/api/message"
+PHONE=ID DO GRUPO DO WHATSAPP
+TITULO=""
+MESSAGE="A API está funcionando ✅"
+
+curl --location --request POST "$URL" \
+--header 'Content-Type: application/json' \
+--data-raw "{
+    \"number\": \"${PHONE}\",
+    \"message\": \"${MESSAGE}\"
+}"
