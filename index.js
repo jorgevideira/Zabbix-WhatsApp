@@ -1,6 +1,4 @@
-// Desenvoldo por: Bee Solutions //
-// Autor: Fernando Almondes //
-// Data: 07/07/2023 //
+// Desenvoldo por: JLSB //
 // Inicie primeiro o index para salvar a sessao | Leia o qrcode gerado //
 
 const qrcode = require('qrcode-terminal');

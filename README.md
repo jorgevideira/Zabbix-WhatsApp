@@ -4,9 +4,9 @@ Envio de alertas do Zabbix via WhatsApp
 
 # Criar um diretório
 
-mkdir /opt/beezap2
+mkdir /opt/whatsapp
 
-cd /opt/beezap2
+cd /opt/whatsapp
 
 # Instalar build-essential e curl
 
@@ -48,28 +48,28 @@ npm install moment-timezone
 
 # --------fora da imagem--------
 
-copiar o arquivo index.js para /opt/zap
+copiar o arquivo index.js para /opt/whatsapp
 
-copiar o arquivo beezap2.js para /opt/zap
+copiar o arquivo whatsapp-service.js para /opt/whatsapp
 
-importar no zabbix um tipo de midia --> alertas whatsapp - xml
+importar no zabbix um tipo de midia --> alertas WhatsApp.xml
 
 # Iniciar o qrcode 
 
 node index.js 
 
 # testar node beezap2.js --> 25 minutos
-node  beezap2.js
+node  whatsapp-service.js
 
 Esperar o serviço subir e dar a mensagem de autenticado.
 
 
-Vincular o numero do cel ou do grupo ao usuário escolhendo o tipo de midia como alertas Whatsapp
+No zabbix vincular o numero do celular ou do grupo ao usuário escolhendo o tipo de midia como alertas Whatsapp
 
 
 # criar uma action 
 
-no diretorio de scripts do zabbix /usr/lib/zabbix/alertscripts copiar o script beezap2.sh e dar permissão de execução chmod +x
+no diretorio de scripts do zabbix /usr/lib/zabbix/alertscripts copiar o script whatsapp-script.sh e dar permissão de execução chmod +x
 
 Teste o envio de mensagem
 
@@ -89,7 +89,7 @@ node index.js
 
 # Rodar em segundo plano 
 
-pm2 start beezap2.js
+pm2 start whatsapp-service.js
 
 pm2 status 
 
@@ -99,8 +99,8 @@ pm2 logs
 ## centos
 
 # Criar um diretório
-mkdir /opt/beezap2
-cd /opt/beezap2
+mkdir /opt/whatsapp
+cd /opt/whatsapp
 
 # Instalar as ferramentas de desenvolvimento e curl
 yum groupinstall -y "Development Tools"
@@ -128,14 +128,14 @@ npm init -y
 npm install whatsapp-web.js express qrcode-terminal multer moment-timezone
 
 # Copiar os arquivos index.js e beezap2.js para /opt/zap (você precisa ter esses arquivos disponíveis)
-cp index.js /opt/zap
-cp beezap2.js /opt/zap
+cp index.js /opt/whatsapp
+cp whatsapp-service.js /opt/whatsapp
 
 # Iniciar o qrcode 
 node index.js 
 
-# Testar node beezap2.js --> 25 minutos
-node beezap2.js 
+# Testar node beezap2.js 
+node whatsapp-service.js 
 
 # Alterar a fonte da API para direto do Github no arquivo package.json
 sed -i 's/"whatsapp-web.js": ".*"/"whatsapp-web.js": "github:pedroslopez/whatsapp-web.js"/' package.json
@@ -147,3 +147,8 @@ npm update whatsapp-web-js
 node index.js 
 
 
+Créditos:
+
+https://github.com/pedroslopez/whatsapp-web.js
+
+https://github.com/jorgevideira
