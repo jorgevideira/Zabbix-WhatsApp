@@ -1,0 +1,31 @@
+# Use Debian as base image
+FROM debian:bullseye-20231009
+
+# Create and set working directory
+WORKDIR /opt/whatsapp
+
+# Install build-essential and curl
+RUN apt-get update && apt-get install -y build-essential curl wget vim
+
+# Install libgbm-dev
+RUN apt-get install -y libgbm-dev
+
+# Install Google Chrome
+RUN wget https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
+RUN apt install -y ./google-chrome-stable_current_amd64.deb
+
+# Install NPM and dependencies
+RUN apt-get install -y npm
+RUN npm install -g pm2
+RUN npm install -g n && n latest
+RUN npm init -y
+RUN npm install whatsapp-web.js express qrcode-terminal multer moment-timezone
+
+# Copy necessary files to the container
+COPY index.js /opt/whatsapp
+COPY whatsapp-service.js /opt/whatsapp
+
+# Outside of the image, copy alertas WhatsApp.xml to the appropriate location
+
+# Start qrcode
+CMD [tail -f /dev/null]
