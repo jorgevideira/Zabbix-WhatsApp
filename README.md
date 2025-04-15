@@ -1,154 +1,179 @@
-# Zabbix-WhatsApp
-Envio de alertas do Zabbix via WhatsApp 
+# 📲 Zabbix WhatsApp Alerts
 
+Envio de alertas do Zabbix via WhatsApp utilizando [`whatsapp-web.js`](https://github.com/pedroslopez/whatsapp-web.js).
 
-# Criar um diretório
+> 💡 Testado no **Debian 12**
 
-mkdir /opt/whatsapp
+---
 
+## 📁 Estrutura de Diretórios
+
+Crie o diretório onde o projeto será instalado:
+
+```bash
+mkdir -p /opt/whatsapp
 cd /opt/whatsapp
+```
 
-# Instalar build-essential e curl
+---
 
-apt-get install -y build-essential curl
+## 🧰 Pré-requisitos
 
-# Instalar a lib libgbm-dev
+Instale os pacotes necessários:
 
-apt-get install -y libgbm-dev
+```bash
+sudo apt update && sudo apt upgrade -y
+sudo apt install -y build-essential curl libgbm-dev libvulkan1 gnupg ca-certificates
+```
 
-# Instalar o google Chrome
+---
 
+## 🌐 Instalação do Google Chrome
+
+O `whatsapp-web.js` requer um navegador para funcionar corretamente. Instale o Google Chrome com os comandos abaixo:
+
+```bash
 wget https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
+sudo apt install ./google-chrome-stable_current_amd64.deb
+```
 
-apt install -y pacote baixado
+---
 
-dpkg -i pacote_baixado
+## ⚙️ Instalação do Node.js e NPM
 
-# Instalar NPM e dependencias
+Use o repositório oficial do NodeSource:
 
-apt install npm
+```bash
+curl -fsSL https://deb.nodesource.com/setup_20.x | sudo bash -
+sudo apt install -y nodejs
+```
 
+Verifique as versões:
+
+```bash
+node -v
+npm -v
+```
+
+---
+
+## 📦 Instalação de dependências do projeto
+
+```bash
 npm install -g pm2
-
-npm install -g n --> Instalar o node
-
-n latest --> Atualizar o node
+npm install -g n         # Gerenciador de versões do Node.js
+n latest                 # Atualiza para a última versão do Node.js
 
 npm init -y
 
-npm install whatsapp-web.js
-
-npm install express
-
-npm install qrcode-terminal
-
-npm install multer
-
-npm install moment-timezone
-
-# --------fora da imagem--------
-
-copiar o arquivo index.js para /opt/whatsapp
-
-copiar o arquivo whatsapp-service.js para /opt/whatsapp
-
-importar no zabbix um tipo de midia --> alertas WhatsApp.xml
-
-# Iniciar o qrcode 
-
-node index.js 
-
-# testar node beezap2.js --> 25 minutos
-node  whatsapp-service.js
-
-Esperar o serviço subir e dar a mensagem de autenticado.
-
-
-No zabbix vincular o numero do celular ou do grupo ao usuário escolhendo o tipo de midia como alertas Whatsapp
-
-
-# criar uma action 
-
-no diretorio de scripts do zabbix /usr/lib/zabbix/alertscripts copiar o script whatsapp-script.sh e dar permissão de execução chmod +x
-
-Teste o envio de mensagem
-
-http://ip-onde-esta-rodando-o-node:4000/api/message?number=numero-ou-id-do-grupo&message=Bee
-
-
-# Altere a fonte da API para direto do Github
-nano package.json
-"whatsapp-web.js": "github:pedroslopez/whatsapp-web.js"
-
-# Atualizando o whatsapp-web.js
-npm update whatsapp-web-js
-
-# Faça o login no WhatsApp
-node index.js
-
-
-# Rodar em segundo plano 
-
-pm2 start whatsapp-service.js
-
-pm2 status 
-
-pm2 logs
------------------------------------------------------------------------------------------------------------------------
-
-## centos
-
-# Criar um diretório
-mkdir /opt/whatsapp
-cd /opt/whatsapp
-
-# Instalar as ferramentas de desenvolvimento e curl
-yum groupinstall -y "Development Tools"
-yum install -y curl
-
-# Instalar a lib libgbm-dev
-yum install -y mesa-libgbm mesa-libgbm-devel
-
-# Instalar o google Chrome
-wget https://dl.google.com/linux/direct/google-chrome-stable_current_x86_64.rpm
-yum localinstall -y google-chrome-stable_current_x86_64.rpm
-
-# Instalar npm
-curl -sL https://rpm.nodesource.com/setup_14.x | bash -
-yum install -y nodejs
-
-# Instalar pm2 e n globalmente
-npm install -g pm2 n
-
-# Atualizar o node
-n latest
-
-# Inicializar o projeto Node.js e instalar as dependências necessárias
-npm init -y
 npm install whatsapp-web.js express qrcode-terminal multer moment-timezone
+```
 
-# Copiar os arquivos index.js e beezap2.js para /opt/zap (você precisa ter esses arquivos disponíveis)
-cp index.js /opt/whatsapp
-cp whatsapp-service.js /opt/whatsapp
+---
 
-# Iniciar o qrcode 
-node index.js 
+## 🧾 Configuração do Projeto
 
-# Testar node beezap2.js 
-node whatsapp-service.js 
+1. Copie os arquivos `index.js` e `whatsapp-service.js` para o diretório `/opt/whatsapp`.
 
-# Alterar a fonte da API para direto do Github no arquivo package.json
-sed -i 's/"whatsapp-web.js": ".*"/"whatsapp-web.js": "github:pedroslopez/whatsapp-web.js"/' package.json
+2. Altere a fonte do pacote `whatsapp-web.js` para a versão mais recente no GitHub:
 
-# Atualizar o whatsapp-web.js
-npm update whatsapp-web-js
+```bash
+vi package.json
+```
 
-# Fazer login no WhatsApp novamente
-node index.js 
+Substitua:
 
+```json
+"whatsapp-web.js": "^..."
+```
 
-Créditos:
+Por:
 
-https://github.com/pedroslopez/whatsapp-web.js
+```json
+"whatsapp-web.js": "github:pedroslopez/whatsapp-web.js"
+```
 
-https://github.com/jorgevideira
+3. Atualize o pacote:
+
+```bash
+npm update whatsapp-web.js
+```
+
+4. Edite o arquivo de constantes:
+
+```bash
+vi /opt/whatsapp/node_modules/whatsapp-web.js/src/util/Constants.js
+```
+
+Altere o trecho:
+
+```js
+webVersionCache: {
+  type: 'local',
+},
+```
+
+Para:
+
+```js
+webVersionCache: {
+  type: 'remote',
+  remotePath: 'https://raw.githubusercontent.com/wppconnect-team/wa-version/main/html/2.2412.54.html',
+},
+```
+
+---
+
+## 🔐 Login no WhatsApp
+
+Execute:
+
+```bash
+node index.js
+```
+
+Escaneie o QR Code com o WhatsApp e aguarde até que o login seja concluído. Repita o processo, se necessário, até não solicitar mais o QR Code.
+
+---
+
+## 🚀 Executando a API em segundo plano
+
+Use o `pm2` para manter o serviço ativo:
+
+```bash
+pm2 start whatsapp-service.js
+pm2 status
+pm2 logs
+```
+
+---
+
+## 🧪 Teste de Envio de Mensagens
+
+Faça um teste via navegador ou ferramenta HTTP:
+
+```
+http://<ip-do-servidor>:4000/api/message?number=<numero-ou-id-do-grupo>&message=Bee
+```
+
+---
+
+## 🛠️ Integração com o Zabbix
+
+1. Importe o tipo de mídia `alertas_WhatsApp.xml` no Zabbix.
+
+2. Copie o script de alerta:
+
+```bash
+cp whatsapp-script.sh /usr/lib/zabbix/alertscripts/
+chmod +x /usr/lib/zabbix/alertscripts/whatsapp-script.sh
+```
+
+3. Crie uma action no Zabbix para envio de alertas via WhatsApp utilizando o novo tipo de mídia.
+
+---
+
+## 🙌 Créditos
+
+- [whatsapp-web.js (pedroslopez)](https://github.com/pedroslopez/whatsapp-web.js)
+- [jorgevideira](https://github.com/jorgevideira)
