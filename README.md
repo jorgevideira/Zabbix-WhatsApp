@@ -132,7 +132,7 @@ Execute:
 node index.js
 ```
 
-Escaneie o QR Code com o WhatsApp e aguarde até que o login seja concluído. Repita o processo, se necessário, até não solicitar mais o QR Code.
+Escaneie o QR Code com o WhatsApp e aguarde até que o login seja concluído. Aperte ctrl+c e Repita o processo, se necessário, até não solicitar mais o QR Code.
 
 ---
 
