@@ -1,4 +1,3 @@
-
 //JLSB
 // Aqui tem duas rotas, uma para enviar mensagens e outra para enviar arquivos //
 
@@ -26,7 +25,6 @@ client.on('authenticated', () => {
 });
 
 client.on('auth_failure', msg => {
-    // Fired if session restore was unsuccessful
     console.error('Falha na autenticacao', msg);
 });
 
@@ -37,101 +35,72 @@ client.on('ready', () => {
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// Enviando mensagens inicio | POST //
-
-// Rota para enviar mensagem
-app.post('/api/message', (req, res) => {
-  const { number, message } = req.body;
-
-const isGroup = (number) => {
-  return number.toString().startsWith('55') && number.toString().length === 12;
+const isIndividual = (number) => {
+  return number.toString().startsWith('55') && number.toString().length >= 12 && number.toString().length <= 13;
 };
 
 const getCurrentTime = () => {
-    return moment().tz('America/Sao_Paulo').format('YYYY-MM-DD HH:mm:ss');
+  return moment().tz('America/Sao_Paulo').format('YYYY-MM-DD HH:mm:ss');
 };
 
-if (isGroup(number)) {
+// Enviando mensagens inicio | POST //
 
-  // Envia a mensagem usando o cliente do WhatsApp
-  client.sendMessage(`${number}@c.us`, message)
-    .then(() => {
-        // Registro de sucesso
+app.post('/api/message', (req, res) => {
+  const { number, message } = req.body;
+
+  if (isIndividual(number)) {
+    client.sendMessage(`${number}@c.us`, message)
+      .then(() => {
         console.log(getCurrentTime(), '- Mensagem enviada com sucesso para:', number);
-        //console.log('Mensagem:', message);
-      res.json({ message: 'Mensagem enviada com sucesso' });
-    })
-    .catch((error) => {
-        // Registro de erro
+        res.json({ message: 'Mensagem enviada com sucesso' });
+      })
+      .catch((error) => {
         console.error(getCurrentTime(), '- Erro ao enviar mensagem para:', number);
         console.error('Erro:', error);
-      res.status(500).json({ error: 'Erro ao enviar mensagem' });
-    });
-}
-else {
-
-  // Envia a mensagem usando o cliente do WhatsApp
-  client.sendMessage(`${number}@g.us`, message)
-    .then(() => {
-        // Registro de sucesso
-        console.log(getCurrentTime(), '- Mensagem enviada com sucesso para:', number);
-        //console.log('Mensagem:', message);
-      res.json({ message: 'Mensagem enviada com sucesso' });
-    })
-    .catch((error) => {
-        // Registro de erro
-        console.error(getCurrentTime(), '- Erro ao enviar mensagem para:', number);
+        res.status(500).json({ error: 'Erro ao enviar mensagem' });
+      });
+  } else {
+    client.sendMessage(`${number}@g.us`, message)
+      .then(() => {
+        console.log(getCurrentTime(), '- Mensagem enviada com sucesso para grupo:', number);
+        res.json({ message: 'Mensagem enviada com sucesso para grupo' });
+      })
+      .catch((error) => {
+        console.error(getCurrentTime(), '- Erro ao enviar mensagem para grupo:', number);
         console.error('Erro:', error);
-      res.status(500).json({ error: 'Erro ao enviar mensagem' });
-    });
-}
-
+        res.status(500).json({ error: 'Erro ao enviar mensagem para grupo' });
+      });
+  }
 });
 
 // Enviando mensagens fim | POST //
 
 // Enviando mensagens inicio | GET //
 
-// Rota para enviar mensagem
 app.get('/api/message', (req, res) => {
   const { number, message } = req.query;
 
-  const isGroup = (number) => {
-    return number.toString().startsWith('55') && number.toString().length === 12;
-  };
-
-  const getCurrentTime = () => {
-    return moment().tz('America/Sao_Paulo').format('YYYY-MM-DD HH:mm:ss');
-  };
-
-  if (isGroup(number)) {
-    // Envia a mensagem usando o cliente do WhatsApp
+  if (isIndividual(number)) {
     client.sendMessage(`${number}@c.us`, message)
       .then(() => {
-      // Registro de sucesso
-      console.log(getCurrentTime(), '- Mensagem enviada com sucesso para:', number);
-      //console.log('Mensagem:', message);
+        console.log(getCurrentTime(), '- Mensagem enviada com sucesso para:', number);
         res.json({ message: 'Mensagem enviada com sucesso' });
       })
       .catch((error) => {
-        console.error('Erro ao enviar mensagem:', error);
+        console.error(getCurrentTime(), '- Erro ao enviar mensagem para:', number);
+        console.error('Erro:', error);
         res.status(500).json({ error: 'Erro ao enviar mensagem' });
       });
-  }
-  else {
-    // Envia a mensagem usando o cliente do WhatsApp
+  } else {
     client.sendMessage(`${number}@g.us`, message)
       .then(() => {
-          // Registro de sucesso
-          console.log(getCurrentTime(), '- Mensagem enviada com sucesso para:', number);
-          //console.log('Mensagem:', message);
-          res.json({ message: 'Mensagem enviada com sucesso' });
+        console.log(getCurrentTime(), '- Mensagem enviada com sucesso para grupo:', number);
+        res.json({ message: 'Mensagem enviada com sucesso para grupo' });
       })
       .catch((error) => {
-          // Registro de erro
-          console.error(getCurrentTime(), '- Erro ao enviar mensagem para:', number);
-          console.error('Erro:', error);
-        res.status(500).json({ error: 'Erro ao enviar mensagem' });
+        console.error(getCurrentTime(), '- Erro ao enviar mensagem para grupo:', number);
+        console.error('Erro:', error);
+        res.status(500).json({ error: 'Erro ao enviar mensagem para grupo' });
       });
   }
 });
@@ -153,33 +122,24 @@ const storage = multer.diskStorage({
 const upload = multer({ storage: storage });
 
 app.post('/api/download', upload.single('file'), async (req, res) => {
+  try {
+    const { number, filepath, caption, destination } = req.body;
+    const uploadDirectory = destination || 'uploads/';
+    const media = MessageMedia.fromFilePath(`${uploadDirectory}${filepath}`);
 
-    const getCurrentTime = () => {
-            return moment().tz('America/Sao_Paulo').format('YYYY-MM-DD HH:mm:ss');
-        };
-
-    try {
-        const {number, filepath, caption, destination} = req.body;
-        const uploadDirectory = destination || 'uploads/';
-        const media = MessageMedia.fromFilePath(`${uploadDirectory}${filepath}`);
-        const isGroup = (number) => {
-          return number.toString().startsWith('55') && number.toString().length === 12;
-        };
-
-        if (isGroup(number)) {
-            await client.sendMessage(`${number}@c.us`, media, {caption: `${caption}`});
-            // Registro de sucesso
-            console.log(getCurrentTime(), '- Arquivo enviado com sucesso para:', number);
-            res.json({message: 'Arquivo enviado com sucesso para: ' + `${number}@c.us`});
-        } else {
-            await client.sendMessage(`${number}@g.us`, media, {caption: `${caption}`});
-            console.log(getCurrentTime(), '- Arquivo enviado com sucesso para:', number);
-            res.json({message: 'Arquivo enviado com sucesso para: ' + `${number}@g.us`});
-        }
-    } catch (error){
-        console.error(getCurrentTime(), '- Erro ao enviar o arquivo:', error);
-        res.status(500).send('Erro ao enviar o arquivo');
+    if (isIndividual(number)) {
+      await client.sendMessage(`${number}@c.us`, media, { caption });
+      console.log(getCurrentTime(), '- Arquivo enviado com sucesso para:', number);
+      res.json({ message: 'Arquivo enviado com sucesso para: ' + `${number}@c.us` });
+    } else {
+      await client.sendMessage(`${number}@g.us`, media, { caption });
+      console.log(getCurrentTime(), '- Arquivo enviado com sucesso para grupo:', number);
+      res.json({ message: 'Arquivo enviado com sucesso para grupo: ' + `${number}@g.us` });
     }
+  } catch (error) {
+    console.error(getCurrentTime(), '- Erro ao enviar o arquivo:', error);
+    res.status(500).send('Erro ao enviar o arquivo');
+  }
 });
 
 // Enviando arquivo fim //
