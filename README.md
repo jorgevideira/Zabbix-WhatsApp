@@ -169,6 +169,8 @@ cp whatsapp-script.sh /usr/lib/zabbix/alertscripts/
 chmod +x /usr/lib/zabbix/alertscripts/whatsapp-script.sh
 ```
 
+3. Ou Importe o xml webhook-mediatype-whatsapp.xml, no media type, para ter um media type do tipo webhook
+
 3. Crie uma action no Zabbix para envio de alertas via WhatsApp utilizando o novo tipo de mídia.
 
 ---
