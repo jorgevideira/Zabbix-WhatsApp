@@ -1,0 +1,124 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<zabbix_export>
+    <version>7.0</version>
+    <media_types>
+        <media_type>
+            <name>WhatsApp</name>
+            <type>WEBHOOK</type>
+            <parameters>
+                <parameter>
+                    <name>Message</name>
+                    <value>{ALERT.MESSAGE}</value>
+                </parameter>
+                <parameter>
+                    <name>Server</name>
+                    <value>192.168.105.6:4000</value>
+                </parameter>
+                <parameter>
+                    <name>Subject</name>
+                    <value>{ALERT.SUBJECT}</value>
+                </parameter>
+                <parameter>
+                    <name>To</name>
+                    <value>{ALERT.SENDTO}</value>
+                </parameter>
+            </parameters>
+            <script>var WhatsApp = {
+    to: null,
+    message: null,
+    server: null,
+
+
+    escapeMarkup: function (str, mode) {
+        switch (mode) {
+            case 'markdown':
+                return str.replace(/([_*\[`])/g, '\\$&amp;amp;');
+
+            case 'markdownv2':
+                return str.replace(/([_*\[\]()~`&amp;gt;#+\-=|{}.!])/g, '\\$&amp;amp;');
+
+            default:
+                return str;
+        }
+    },
+
+    sendMessage: function () {
+        var params = {
+            number: WhatsApp.to,
+            message: WhatsApp.message
+        },
+        data,
+        response,
+        request = new HttpRequest(),
+        url = 'http://' + WhatsApp.server + '/api/message';
+
+        request.addHeader('Content-Type: application/json');
+        data = JSON.stringify(params);
+
+        Zabbix.log(4, '[WhatsApp Webhook] params: ' + data);
+        response = request.post(url, data);
+        Zabbix.log(4, '[WhatsApp Webhook] HTTP code: ' + request.getStatus());
+
+        try {
+            response = JSON.parse(response);
+        }
+        catch (error) {
+            response = null;
+        }
+    }
+};
+
+try {
+    var params = JSON.parse(value);
+
+    WhatsApp.server = params.Server;
+    WhatsApp.to = params.To;
+    WhatsApp.message = params.Subject + '\n' + params.Message;
+
+    WhatsApp.sendMessage();
+
+    return 'OK';
+}
+catch (error) {
+    Zabbix.log(4, '[WhatsApp Webhook] notification failed: ' + error);
+    throw 'Sending failed: ' + error + '.';
+}</script>
+            <timeout>10s</timeout>
+            <message_templates>
+                <message_template>
+                    <event_source>TRIGGERS</event_source>
+                    <operation_mode>PROBLEM</operation_mode>
+                    <subject>❌ *Problema: {HOST.NAME}*</subject>
+                    <message>*Iniciado em*: {EVENT.TIME}
+*Problema*: {EVENT.NAME}
+*Host*: {HOST.NAME}
+*Item*: {ITEM.NAME}
+*IP*: {HOST.IP}
+*Severidade*: {EVENT.SEVERITY}
+*Status Atual*: {EVENT.OPDATA}</message>
+                </message_template>
+                <message_template>
+                    <event_source>TRIGGERS</event_source>
+                    <operation_mode>RECOVERY</operation_mode>
+                    <subject>✅ *Resolvido: {HOST.NAME}*</subject>
+                    <message>*Resolvido em*: {EVENT.RECOVERY.TIME} de {EVENT.RECOVERY.DATE}
+*Problema*: {EVENT.NAME}
+*Duração*: {EVENT.DURATION}
+*Host*: {HOST.NAME}
+*IP*: {HOST.IP}
+*Severidade*: {EVENT.SEVERITY}
+*Status Atual*: {EVENT.OPDATA}</message>
+                </message_template>
+                <message_template>
+                    <event_source>TRIGGERS</event_source>
+                    <operation_mode>UPDATE</operation_mode>
+                    <subject>Updated problem in {EVENT.AGE}: {EVENT.NAME}</subject>
+                    <message>{USER.FULLNAME} {EVENT.UPDATE.ACTION} problem at {EVENT.UPDATE.DATE} {EVENT.UPDATE.TIME}.
+{EVENT.UPDATE.MESSAGE}
+
+Current problem status is {EVENT.STATUS}, age is {EVENT.AGE}, acknowledged: {EVENT.ACK.STATUS}.</message>
+                </message_template>
+            </message_templates>
+        </media_type>
+    </media_types>
+</zabbix_export>
